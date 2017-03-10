@@ -82,6 +82,16 @@ open http://localhost:8002
           'Account': '#FF9500',
           'DailyBoxOffice': '#00FF00',
           'Cinema': '#3399FF',
+          'ShippingInfo': '#00FF00',
+          'ListingInfo': '#FF00FF',
+          'SellingStatus': '#FF0000',
+          'Item': '#EEEEEE',
+          'PostalCode': '#3399FF',
+          'City': '#0000FF',
+          'Country': '#0000FF',
+          'StateOrProvince': '#0000FF',
+          'Category': '#FF9500',
+          'PaymentMethod': '#FFFF00'
           };
 
 
@@ -120,6 +130,16 @@ open http://localhost:8002
             'Account': 0xFF9500FF,
             'DailyBoxOffice': 0x00FF00FF,
             'Cinema': 0x3399FFFF,
+            'ShippingInfo': 0x00FF00FF,
+            'ListingInfo': 0xFF00FFFF,
+            'SellingStatus': 0xFF0000FF,
+            'Item':  0xEEEEEEFF,
+            'PostalCode': 0x3399FFFF,
+            'City': 0x0000FFFF,
+            'Country': 0x0000FFFF,
+            'StateOrProvince': 0x0000FFFF,
+            'Category': 0xFF9500FF,
+            'PaymentMethod': 0xFFFF00FF
             };
 
         var graphics = Viva.Graph.View.webglGraphics();
@@ -285,7 +305,7 @@ open http://localhost:8002
 
 
 // Basic
-            query("(to)<-[*1]-(from)",5000);
+            query("(to)<-[*1]-(from)",160000);
 
 // Basic
 //            query("(to)<-[ :HAS_ACCOUNT | HAS_CONTACT | IS_CLIENT_OF ]-(from)",50000);
