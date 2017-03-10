@@ -1,0 +1,864 @@
+<html>
+
+    <head>
+        <meta charset="utf-8">
+        <title>streamline</title>
+        <!-- lsfont.html by Jan Bobrowski 2009-2014 -->
+        <meta name="author" content="Jan Bobrowski">
+        <meta name="description" content="List TrueType, OpenType or WOFF font. Append font URL after '#' or open font from local file.">
+        <link rel="license" href="http://creativecommons.org/licenses/by-sa/3.0">
+        <style>
+            #inp,
+            body {
+                position: relative
+            }
+
+            a,
+            input {
+                color: inherit
+            }
+
+            #x,
+            footer {
+                position: absolute;
+                right: 0
+            }
+
+            dt,
+            td {
+                color: #444
+            }
+
+            h1,
+            td {
+                text-align: center
+            }
+
+            html {
+                height: 100%
+            }
+
+            body {
+                min-height: 100%;
+                margin: 0;
+                background: #F5F5F5;
+                color: #111;
+                font: 15px arial, sans-serif
+            }
+
+            footer {
+                overflow: hidden;
+                bottom: 0;
+                left: 0;
+                height: 15px;
+                padding: 0 16px;
+                font-size: 9px;
+                text-align: right;
+                color: #666
+            }
+
+            h1 {
+                font: 20px arial, sans-serif
+            }
+
+            a {
+                text-decoration: none
+            }
+
+            a[href]:hover {
+                text-decoration: underline
+            }
+
+            #inp {
+                height: 7px;
+                min-height: 7px;
+                max-height: 7px;
+                padding: 1px;
+                background: #3B2F27;
+                color: #FFC28E;
+                border-bottom: 1px solid #FFF
+            }
+
+            #inp>div {
+                width: 600px;
+                margin: 2em auto
+            }
+
+            input {
+                font: inherit;
+                padding: 2px 6px;
+                margin: 0;
+                border: 1px solid #6D573D;
+                background: 0 0;
+                outline-color: #FFC28E
+            }
+
+            #x,
+            body.ninp #inp {
+                cursor: pointer
+            }
+
+            body:not(.ninp) #inp {
+                height: auto;
+                min-height: 222px;
+                max-height: 250px
+            }
+
+            body.ninp #inp>:not(#x) {
+                display: none
+            }
+
+            article {
+                padding: 1%
+            }
+
+            #x {
+                bottom: -9px;
+                font: 16px/8px sans-serif;
+                padding: 0 16px 0 0;
+                color: #3B2F27;
+                text-shadow: #FFF 1px 1px
+            }
+
+            body.inp #x:before {
+                content: '\25B4\25B4\25B4'
+            }
+
+            body.ninp #x:before {
+                content: '\25BE\25BE\25BE'
+            }
+
+            article>div {
+                max-width: 620px;
+                margin: auto
+            }
+
+            dl {
+                line-height: 1.1em
+            }
+
+            dt {
+                display: compact;
+                font-size: 90%;
+                padding-right: 1ex
+            }
+
+            dd {
+                margin: 0 0 3px 9em;
+                white-space: pre-wrap
+            }
+
+            #t {
+                table-layout: fixed;
+                border-collapse: collapse;
+                margin: 1em auto
+            }
+
+            #t>* {
+                border-top: 1px solid #888;
+                cursor: default
+            }
+
+            td {
+                border: 1px solid #888;
+                width: 40px;
+                height: 40px;
+                max-width: 64px;
+                vertical-align: middle
+            }
+
+            td.c {
+                background: #FFF;
+                font: 30px thefont, monospace;
+                box-shadow: 0 0 1px transparent
+            }
+
+            td.c:hover {
+                position: relative;
+                transform: scale(2);
+                box-shadow: 0 7px 15px rgba(0, 0, 0, .35);
+                transition: all 0s 150ms;
+                color: #000
+            }
+
+            th {
+                font: 10px sans-serif;
+                padding: 8px
+            }
+
+            #o3 {
+                font-size: 13px
+            }
+
+            @media print {
+                body,
+                dt,
+                footer,
+                td {
+                    color: #000
+                }
+                body {
+                    background: 0 0;
+                    padding: 0;
+                    border: 0;
+                    min-height: 0
+                }
+                tbody {
+                    border-top: 1px solid #000
+                }
+                td {
+                    border: .5px solid #000
+                }
+                th {
+                    padding-left: 0
+                }
+                #inp {
+                    display: none!important
+                }
+                footer {
+                    position: static
+                }
+            }
+
+        </style>
+        <style></style>
+    </head>
+
+    <body class="ninp">
+        <script>
+            ! function(e) {
+                function t(e) {
+                    e >= 0 || (e = "inp" != d.className), d.className = e ? "inp" : "ninp", e && scrollTo(0, 0)
+                }
+
+                function r() {
+                    var e = location.hash.substr(1);
+                    e != p && (p = e, e && i({
+                        url: e
+                    }))
+                }
+
+                function n() {
+                    u("#file").click()
+                }
+
+                function i(r) {
+                    function n(e) {
+                        var t;
+                        t = l("p"), t.textContent = e, t.style.color = "red", c(i, t), t = u("#pb"), t && t.remove()
+                    }
+                    location.hash = "#" + (r.url || ""), t(0);
+                    var i = h;
+                    i.innerHTML = "<div>", i = i.firstChild, i.textContent = "Loading" + (r.url ? " " + r.url : "") + "...", i.innerHTML += "<div id=pb style=font-size:16px>", f(r, function(t, r, i) {
+                        if (!r) return n(i);
+                        r = new Uint8Array(r);
+                        var f = a(r);
+                        if (!f.file) return n(f);
+                        var u = e.styleSheets[1],
+                            l = u.cssRules[0],
+                            c = t.url;
+                        c || (c = URL.createObjectURL(t.file)), l && u.deleteRule(l), u.insertRule('@font-face {font-family:thefont;src:url("' + c + '")}', u.cssRules.length), o(f)
+                    })
+                }
+
+                function o(t) {
+                    function r(e) {
+                        var t = l("td");
+                        return null != e && (t.textContent = String.fromCharCode(e), t.className = "c"), c(f, t), o++, t
+                    }
+
+                    function n(e) {
+                        return e && e.toISOString().substr(0, 10)
+                    }
+                    if (h.innerHTML = "<h1></h1><table id=t></table><div id=o3><dl compact></dl><p>", h.firstChild.textContent = e.title = t.name || "No Name", t.cmapGetter) {
+                        var i, o, a, f, s, d, p = t.cmapGetter(0);
+                        for (i = p(); i >= 0;) {
+                            o = i & -16, d = l("tbody");
+                            do {
+                                f = l("tr"), s = l("th"), s.innerHTML = ("000" + o.toString(16).toUpperCase()).substr(-4), c(f, s), c(d, f), a = o + 15;
+                                do {
+                                    for (; o < i;) r();
+                                    r(i), i = p()
+                                } while (i >= 0 && i <= a);
+                                for (; 15 & o;) r()
+                            } while (i >= 0 && i < o + 16);
+                            c(u("#t"), d)
+                        }
+                    }
+                    var v, m, y = {
+                            0: "Copyright",
+                            1: "Family",
+                            2: "Subfamily",
+                            3: "Id",
+                            4: "Full Name",
+                            5: "Version",
+                            6: "PostScript Name",
+                            7: "Trademark",
+                            8: "Manufacturer",
+                            9: "Designer",
+                            10: "Description",
+                            11: "Manufacturer URL",
+                            12: "Designer URL",
+                            13: "License",
+                            14: "License URL",
+                            19: "Sample Text"
+                        },
+                        g = t.string;
+                    for (v in g)
+                        if (/^[0-9]+$/.test(v)) {
+                            var b, w = l("dt"),
+                                s = l("dd"),
+                                C = s;
+                            b = v in y ? y[v] : "#" + v, w.textContent = b, w.title = v, m = g[v], /URL/.test(b) && (s = l("a"), s.href = (m.match(/^[^:/]+@/) ? "mailto:" : m.match(/^[a-z0-9]+:/i) ? "" : "http://") + m, c(C, s)), s.textContent = m,
+                                19 == +v && (C.style.fontFamily = "thefont"), c(c(u("dl"), w), C)
+                        }
+                    var T = n(t.created),
+                        L = n(t.modified),
+                        g = t.type;
+                    t.table.glyf || (g = ("TTF" == g ? "OTF" : g) + " PS"), m = L && L != T, v = t.nglyph, g += ", " + v + " glyph" + (v - 1 ? "s" : "") + ", " + t.file.length + " bytes, creat" + (T ? "ed: " + (m ? T : "<time>" + T + "</time>") :
+                        "ion date unknown"), m && (g += " (modified <time>" + L + "</time>)"), u("dl").nextSibling.innerHTML = g
+                }
+
+                function a(e) {
+                    function t(t, r, n, o, f, u) {
+                        var l, c, d, h;
+                        if (!t || t > 99) return "Bad font";
+                        do
+                            if (l = a(r, 4), /^[a-zA-Z0-9/ ]{4}$/.test(l)) {
+                                if (c = i(r + o), d = i(r + f), h = e.subarray(c, c + d), h.length < d) return "Font truncated";
+                                if (u && d < i(r + u)) try {
+                                    h = s(h, 1)
+                                } catch (e) {
+                                    return e
+                                }
+                                v.table[l] = h
+                            }
+                        while (r += n, --t)
+                    }
+
+                    function r(e) {
+                        var t = o(e);
+                        if (t && (t = new Date(1e3 * (t - 2082844800)), +t)) return t
+                    }
+
+                    function n(t) {
+                        return e[t + 1] | e[t] << 8
+                    }
+
+                    function i(t) {
+                        return e[t + 3] | e[t + 2] << 8 | e[t + 1] << 16 | e[t] << 24
+                    }
+
+                    function o(e) {
+                        var t = 65536;
+                        return n(e + 6) + t * n(e + 4) + t * t * n(e + 2) + t * t * t * n(e)
+                    }
+
+                    function a(t, r) {
+                        return String.fromCharCode.apply(String, e.subarray(t, t + r))
+                    }
+
+                    function f(e, t) {
+                        for (var r = ""; t--;) r += String.fromCharCode(n(e)), e += 2;
+                        return r
+                    }
+                    var u, l, c, d, h, p, v = {
+                        file: e,
+                        table: {},
+                        string: {},
+                        type: "TTF"
+                    };
+                    if (u = a(0, 4), "\0\x01\0\0" == u || "true" == u || "typ1" == u || "OTTO" == u) {
+                        if (u = t(n(4), 12, 16, 8, 12)) return u
+                    } else {
+                        if ("wOFF" != u) return "wOF2" == u ? "WOFF2 is not supported" : "Not a font";
+                        if (v.type = "WOFF", u = t(n(12), 44, 20, 4, 8, 12)) return u
+                    }
+                    if (e = v.table.head, !e) return 'No "head" table';
+                    if (u = r(20), u && (v.created = u), u = r(28), u && (v.modified = u), e = v.table.name) {
+                        for (l = n(2), c = 6; l--; c += 12) u = n(c), h = "p" + u + "e" + n(c + 2) + "l" + n(c + 4) + "n" + n(c + 6), p = n(c + 8), d = n(4) + n(c + 10), v.string[h] = 1 == u ? a(d, p) : f(d, p >> 1);
+                        for (l = n(2), p = {}, c = 6; l; l--, c += 12) {
+                            var m = n(c);
+                            if (3 == m) 1033 == n(c + 4) && (m |= 65536);
+                            else if (1 != m) continue;
+                            if (d = n(c + 6), !p[d] || p[d] < m) {
+                                p[d] = m;
+                                var y = n(4) + n(c + 10),
+                                    p = n(c + 8);
+                                v.string[d] = m >= 3 ? f(y, p >> 1) : String.fromCharCode.apply(v, e.subarray(y, y + p))
+                            }
+                        }
+                        u = v.string[4], u && (v.name = u), u = v.string[9], u && (v.designer = u)
+                    }
+                    if (e = v.table.maxp, v.nglyph = n(4), e = v.table.cmap, !e) return 'No "cmap" table';
+                    for (l = n(2), c = 4;;) {
+                        if (!l--) return "Can't find Windows' \"cmap\"";
+                        if (196608 == (i(c) & -2)) break;
+                        c += 8
+                    }
+                    switch (c = i(c + 4), u = n(c)) {
+                        default: return 'Unsupported "cmap" type: ' + u;
+                        case 4:
+                                var g, b = [];
+                            if (l = n(c + 6), !l) return '"cmap" is empty';
+                            for (c += 16, g = 0; g < l; g += 2, c += 2) u = n(c + 3 * l),
+                            u && (u += c + 3 * l),
+                            b.push({
+                                s: n(c + l),
+                                e: n(c - 2),
+                                p: u,
+                                b: n(c + 2 * l)
+                            });v.cmap = b,
+                            v.cmapGetter = function(e) {
+                                var t, r = 0;
+                                return function() {
+                                    for (;; e++) {
+                                        if (!t || e > t.e) {
+                                            do
+                                                if (t = b[r++], !t) return -1; while (e > t.e);
+                                            e = t.s
+                                        }
+                                        if (!t.p || n(t.p + 2 * (e - t.s))) return e++
+                                    }
+                                }
+                            }
+                    }
+                    return v
+                }
+
+                function f(e, t) {
+                    if (e.file) return r = new FileReader, r.onload = function() {
+                        t(e, r.result)
+                    }, r.readAsArrayBuffer(e.file);
+                    var r = new XMLHttpRequest;
+                    r.open("GET", e.url), r.setRequestHeader("Accept", "font/*,*/*"), r.responseType = "arraybuffer", r.send(), r.onload = function() {
+                        var n = r.status;
+                        n && 200 != n ? r.onerror() : t(e, r.response)
+                    }, r.onerror = function() {
+                        var n;
+                        t(e, n, r.statusText || "Error (CORS?)")
+                    };
+                    var n = u("#pb");
+                    n && !(r.onprogress = function(e) {
+                        function t(e, t) {
+                            return Array(t + 1).join(e ? "\u25cf" : "\u25cb")
+                        }
+                        var r, i, o;
+                        e ? (i = e.total, o = e.loaded, i ? (o = 10 * (i - o) / i | 0, r = t(1, 10 - o) + t(0, o)) : (o %= 10, r = t(0, o) + "\u25cf" + t(0, 9 - o))) : r = t(0, 10), n.innerHTML = r
+                    })()
+                }
+
+                function u(t) {
+                    return e.querySelector(t)
+                }
+
+                function l(t) {
+                    return e.createElement(t)
+                }
+
+                function c(e, t) {
+                    return e.appendChild(t), e
+                }
+
+                function s(e, t) {
+                    function r() {
+                        var e = l(16);
+                        if (l(16), e)
+                            do g.push(l(8)); while (--e)
+                    }
+
+                    function n() {
+                        function e(e, t, r) {
+                            r = r || [];
+                            for (var n = e; n <= t; n++) r.push(v[n]);
+                            return r
+                        }
+                        v || d(), m = c([, , , , , , , e(256, 279), e(280, 287, e(0, 143)), e(144, 255)]), y = c([, , , , , e(288, 319)]), o()
+                    }
+
+                    function i() {
+                        var e, t;
+                        e = l(14);
+                        var r = 31 & e,
+                            n = e >> 5 & 31,
+                            i = e >> 10,
+                            a = [];
+                        if (t = i + 4)
+                            do e = l(3), a.push(e); while (--t);
+                        for (var f = [16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15], u = [0, 256, 512, 768, 1024, 1280, 1536, 1792, 2048, 2304, 2560, 2816, 3072, 3328, 3584, 3840, 66336, 131888, 134e3], h = [], t = a.length, p =
+                                0; p < t; p++) h[f[p]] = a[p];
+                        var a = [];
+                        for (p = 0; p < h.length; p++) {
+                            var e = h[p];
+                            e && (a[e] || (a[e] = [])).push(u[p])
+                        }
+                        m = c(a);
+                        var a = [],
+                            p = 0,
+                            t = r + 257;
+                        v || d();
+                        var e, g, b, h, w;
+                        e: for (;;) {
+                            for (e = s(m), b = 1, e >= 256 && (b = 255 & e, e = e < 512 ? g : 0), g = e, h = e ? a[e] || (a[e] = []) : null; b >= t;) {
+                                if (b -= t, h)
+                                    do h.push(v[p++]); while (--t);
+                                if (w) break e;
+                                if (w = a, a = [], p = 288, t = n + 1, !b) continue e;
+                                h && (h = a[e] = [])
+                            }
+                            if (t -= b, h) {
+                                do h.push(v[p++]); while (--b)
+                            } else p += b
+                        }
+                        if (b) throw "Bad Huffman data";
+                        m = c(w), y = c(a), o()
+                    }
+
+                    function o() {
+                        function e(e) {
+                            var t = s(y),
+                                r = g.length - t;
+                            do g.push(g[r++]); while (--e)
+                        }
+                        for (var t;;)
+                            if (t = s(m), t < 256) g.push(t);
+                            else {
+                                if (t &= 65535, !t) break;
+                                e(t)
+                            }
+                    }
+
+                    function a() {
+                        for (; w < 23 && p < e.length;) b |= e[p] << w, w += 8, p++;
+                        return w
+                    }
+
+                    function f(e) {
+                        if (w < e && (a(), w < e)) throw "File truncated"
+                    }
+
+                    function u(e) {
+                        b >>= e, w -= e
+                    }
+
+                    function l(e) {
+                        f(e);
+                        var t = b & (1 << e) - 1;
+                        return u(e), t
+                    }
+
+                    function c(e) {
+                        function t(e, t) {
+                            for (;;) {
+                                var r = e & t;
+                                if (e ^= t, !r) return e;
+                                if (1 & r && e) throw "revadd overflow";
+                                t = r >> 1
+                            }
+                        }
+                        var r = new Array(32768),
+                            n = 0;
+                        return e.forEach(function(e, i) {
+                            var o = 1 << i;
+                            e.forEach(function(e) {
+                                var a = n,
+                                    f = e >> 4 & 15;
+                                if (e |= i, !f || f + i > 15) {
+                                    do r[a] = e, a += o; while (a < 32768)
+                                } else {
+                                    e = e & -256 | i + f;
+                                    var u = 0,
+                                        l = (1 << 8 + f) - 1;
+                                    do r[a] = e + u, u = u + 256 & l, a += o; while (a < 32768)
+                                }
+                                n = t(n, o >> 1)
+                            })
+                        }), r
+                    }
+
+                    function s(e) {
+                        var t, r, n;
+                        if (t = e[32767 & b], r = 15 & t, w < r && (a(), t = e[32767 & b], r = 15 & t), n = 240 & t, t >>= 8, n && (n >>= 4, u(r), w < n && a(), t += b & (1 << n) - 1, r = n), w < r) throw "truncated";
+                        return u(r), t
+                    }
+
+                    function d() {
+                        function e(e, t, n) {
+                            var i = 256,
+                                o = 2 * t;
+                            do {
+                                do r.push(e), e += i; while (--o);
+                                i <<= 1, e += 16, o = t
+                            } while (--n)
+                        }
+                        var t, r = [];
+                        for (t = 0; t < 256; t++) r.push(t << 8);
+                        r.push(16777216), e(16777984, 4, 6), r.push(16843264, 16777216, 16777216), e(256, 2, 14), r.push(0, 0), v = r
+                    }
+                    var h, p;
+                    if (t) {
+                        if (8 != (15 & e[0])) throw "not deflate";
+                        h = e[1]
+                    }
+                    var v, m, y, g = [],
+                        b = 0,
+                        w = 0;
+                    p = 2;
+                    do switch (h = l(3), m = y = null, h >> 1 & 3) {
+                        case 0:
+                            u(7 & w), r();
+                            break;
+                        case 1:
+                            n();
+                            break;
+                        case 2:
+                            i();
+                            break;
+                        case 3:
+                            throw "deflate error"
+                    }
+                    while (!(1 & h));
+                    return new Uint8Array(g)
+                }
+                var d, h, p;
+                onhashchange = r, onload = function() {
+                    d = u("body"), h = u("article"), u("form").onsubmit = function(e) {
+                        e.preventDefault();
+                        var t = this.firstChild.value;
+                        t && (location.hash = "#" + t)
+                    }, r(), u("#file").onchange = function() {
+                        var e = this.files;
+                        e && (e = e[0]) && (this.value = "", i({
+                            file: e
+                        }))
+                    }, setTimeout(function() {
+                        u("#inp").style.transition = "all .1s"
+                    }, 0)
+                }, onclick = function(r) {
+                    var i, o = r.target,
+                        a = o.id || o.parentNode.id;
+                    if ("open" == a) n();
+                    else if ("x" == a) t();
+                    else if (d.className && "file" != a && "Range" != e.getSelection().type) {
+                        do i = "inp" == o.id; while (!i && (o = o.parentNode));
+                        t(i)
+                    }
+                }, onkeydown = function(e) {
+                    79 == e.keyCode && e.ctrlKey && (e.preventDefault(), n()), 27 == e.keyCode && t()
+                }, ondragenter = ondragover = ondrop = function(e) {
+                    var t, r, n = e.type;
+                    return "drop" == n && (t = e.dataTransfer, (r = t.files[0]) ? i({
+                        file: r
+                    }) : (r = t.getData("URL")) && (location.hash = r)), !1
+                }
+            }(document);
+
+        </script>
+        <div id="inp" style="transition: all 0.1s;">
+            <div>
+                <h1>List glyphs in font</h1>
+                <p>Program lists character map of a given font. Accepts TrueType, OpenType and WOFF fonts. </p>
+                <p></p>
+                <form><input type="url" id="url" size="88" accesskey="u" placeholder="URL of the font file"></form>
+                <p><button id="open" accesskey="o"><b>Open local font...</b> ⌘O</button> or drop here </p>
+            </div>
+            <a id="x"></a>
+        </div>
+        <article>
+            <h1>streamline</h1>
+            <table id="t">
+                <tbody>
+                    <tr>
+                        <th>0000</th>
+                        <td class="c"> </td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </tbody>
+                <tbody>
+                    <tr>
+                        <th>0020</th>
+                        <td></td>
+                        <td class="c">!</td>
+                        <td class="c">"</td>
+                        <td class="c">#</td>
+                        <td class="c">$</td>
+                        <td class="c">%</td>
+                        <td class="c">&amp;</td>
+                        <td class="c">'</td>
+                        <td class="c">(</td>
+                        <td class="c">)</td>
+                        <td class="c">*</td>
+                        <td class="c">+</td>
+                        <td class="c">,</td>
+                        <td class="c">-</td>
+                        <td class="c">.</td>
+                        <td class="c">/</td>
+                    </tr>
+                    <tr>
+                        <th>0030</th>
+                        <td class="c">0</td>
+                        <td class="c">1</td>
+                        <td class="c">2</td>
+                        <td class="c">3</td>
+                        <td class="c">4</td>
+                        <td class="c">5</td>
+                        <td class="c">6</td>
+                        <td class="c">7</td>
+                        <td class="c">8</td>
+                        <td class="c">9</td>
+                        <td class="c">:</td>
+                        <td></td>
+                        <td class="c">&lt;</td>
+                        <td class="c">=</td>
+                        <td class="c">&gt;</td>
+                        <td class="c">?</td>
+                    </tr>
+                    <tr>
+                        <th>0040</th>
+                        <td class="c">@</td>
+                        <td class="c">A</td>
+                        <td class="c">B</td>
+                        <td class="c">C</td>
+                        <td class="c">D</td>
+                        <td class="c">E</td>
+                        <td class="c">F</td>
+                        <td class="c">G</td>
+                        <td class="c">H</td>
+                        <td class="c">I</td>
+                        <td class="c">J</td>
+                        <td class="c">K</td>
+                        <td class="c">L</td>
+                        <td class="c">M</td>
+                        <td class="c">N</td>
+                        <td class="c">O</td>
+                    </tr>
+                    <tr>
+                        <th>0050</th>
+                        <td class="c">P</td>
+                        <td class="c">Q</td>
+                        <td class="c">R</td>
+                        <td class="c">S</td>
+                        <td class="c">T</td>
+                        <td class="c">U</td>
+                        <td class="c">V</td>
+                        <td class="c">W</td>
+                        <td class="c">X</td>
+                        <td class="c">Y</td>
+                        <td class="c">Z</td>
+                        <td class="c">[</td>
+                        <td class="c">\</td>
+                        <td class="c">]</td>
+                        <td class="c">^</td>
+                        <td class="c">_</td>
+                    </tr>
+                    <tr>
+                        <th>0060</th>
+                        <td class="c">`</td>
+                        <td class="c">a</td>
+                        <td class="c">b</td>
+                        <td class="c">c</td>
+                        <td class="c">d</td>
+                        <td class="c">e</td>
+                        <td class="c">f</td>
+                        <td class="c">g</td>
+                        <td class="c">h</td>
+                        <td class="c">i</td>
+                        <td class="c">j</td>
+                        <td class="c">k</td>
+                        <td class="c">l</td>
+                        <td class="c">m</td>
+                        <td class="c">n</td>
+                        <td class="c">o</td>
+                    </tr>
+                    <tr>
+                        <th>0070</th>
+                        <td class="c">p</td>
+                        <td class="c">q</td>
+                        <td class="c">r</td>
+                        <td class="c">s</td>
+                        <td class="c">t</td>
+                        <td class="c">u</td>
+                        <td class="c">v</td>
+                        <td class="c">w</td>
+                        <td class="c">x</td>
+                        <td class="c">y</td>
+                        <td class="c">z</td>
+                        <td class="c">{</td>
+                        <td class="c">|</td>
+                        <td class="c">}</td>
+                        <td class="c">~</td>
+                        <td></td>
+                    </tr>
+                </tbody>
+                <tbody>
+                    <tr>
+                        <th>E000</th>
+                        <td class="c">&#xE000;</td>
+                        <td class="c">&#xE001;</td>
+                        <td class="c">&#xE002;</td>
+                        <td class="c">&#xE003;</td>
+                        <td class="c">&#xE004;</td>
+                        <td class="c">&#xE005;</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </tbody>
+                <tbody>
+                    <tr>
+                        <th>FFF0</th>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td class="c">￿</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div id="o3">
+                <dl compact=""><dt title="1">Family</dt>
+                    <dd>streamline</dd><dt title="2">Subfamily</dt>
+                    <dd>Regular</dd><dt title="3">Id</dt>
+                    <dd>FontForge 2.0 : streamline : 1-4-2016</dd><dt title="4">Full Name</dt>
+                    <dd>streamline</dd><dt title="5">Version</dt>
+                    <dd>Version 1.0</dd><dt title="6">PostScript Name</dt>
+                    <dd>streamline</dd>
+                </dl>
+                <p>WOFF PS, 100 glyphs, 12616 bytes, created: <time>2016-04-01</time></p>
+            </div>
+        </article>
+        <footer><a href="http://torinak.com/font/lsfont.html">lsfont.html</a> (<span style="font-size:90%">CC BY-SA</span>) <a href="http://torinak.com/~jb">Jan Bobrowski</a></footer> <input id="file" type="file" accept=".ttf,.otf,.woff" hidden=""> </body>
+
+</html>

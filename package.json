@@ -1,0 +1,28 @@
+{
+  "name": "lead-attr-graph",
+  "version": "1.0.0",
+  "description": "Michael Moore mmoore@societyconsulting.com",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js"
+  },
+  "author": "Michael Moore",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.14.0",
+    "html": "0.0.10",
+    "neo4j-driver": "^1.0.3",
+    "path": "^0.12.7",
+    "vivagraphjs": "^0.8.1"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/qosmy-michael/lead-attr-graph.git"
+  },
+  "bugs": {
+    "url": "https://github.com/qosmy-michael/lead-attr-graph/issues"
+  },
+  "homepage": "https://github.com/qosmy-michael/lead-attr-graph#readme"
+}

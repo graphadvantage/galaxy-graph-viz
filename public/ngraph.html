@@ -1,0 +1,513 @@
+<!--
+bower install neo4j-driver
+bower isntall vivagraphjs
+python -m SimpleHTTPServer 8002
+open http://localhost:8002
+ -->
+<html>
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8"></meta>
+    <title>Graph Viz</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"></meta>
+    <script src="/bower_components/neo4j-driver/lib/browser/neo4j-web.min.js"></script>
+    <script src="/bower_components/vivagraphjs/dist/vivagraph.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.13.1/lodash.min.js"></script>
+
+    <script type="text/javascript" charset="utf-8">
+      function onload() {
+        var neo = neo4j.v1;
+
+        var driver = neo4j.v1.driver("bolt://localhost", neo4j.v1.auth.basic("neo4j", "neo4j"),{encrypted:false});
+
+        var session = driver.session();
+
+        var dump = {
+            onNext: function(record) { console.log(record.keys, record.length, record._fields, record._fieldLookup); },
+            onCompleted: function() { console.log("Completed"); },
+            onError: console.log
+        }
+
+//      session.run("MATCH (n) RETURN COUNT(*)").subscribe(dump);
+
+//      var graphGenerator = Viva.Graph.generator();
+//      var graph = graphGenerator.balancedBinTree(10);
+
+        var graph = Viva.Graph.graph();
+
+//      graph.addLink(1, 2);
+
+        var layout = Viva.Graph.Layout.forceDirected(graph, {
+          springLength : 15, //Ideal length of edges in pixels
+          springCoeff : 0.000025, //Hook's law coefficient. The smaller number loosens edges length
+          dragCoeff : 0.02, //System cooldown coeffecient. The larger it is the faster system will stop
+          gravity : -3.2, //Coulomb's law coefficient. The smaller number makes repeling force stronger. Making it positive makes node attract each other :)
+          theta : 1.0 //Barnes-Hut simulation coefficient. Values larger than 1 will make system converge faster but not necessary to the best layout
+        });
+
+       var nodeColor = 0xFFFFFFFF, // hex rrggbb ffff99 9ee8FF
+            nodeSize = 6;
+
+//Hex colors for legend HTML
+//from nodeLabel property previously set on all nodes in graph
+
+        var colorsHex = {
+          'Org': '#3399FF',
+          'Region': '#3399FF',
+          'Geo': '#EEEEEE',
+          'Indiv': '#FF0000',
+          'Individual': '#FF0000',
+          'Activity':	'#FF9500',
+          'Chain':	'#FF9500',
+          'Lead':	'#FFFF00',
+          'Property':	'#FFFF00',
+          'Oppty': '#FFFF00',
+          'Subscr':	'#00FF00',
+          'Product': '#00FF00',
+          'Offer': '#FF00FF',
+          'Purch Channel': '#FF00FF',
+          'Partner': '#FF00FF',
+          'Budget':	'#0000FF',
+          'Campaign':	'#0000FF',
+          'Organic Search': '#0000FF',
+          'Paid Media': '#0000FF',
+          'Website':	'#0000FF',
+          'Email': '#0000FF',
+          'Event': '#0000FF',
+          'Modern Tele': '#0000FF',
+          'Nurture Program':	'#0000FF',
+          'Day': '#CCCCCC',
+          'Mesh': '#FF9500',
+          'Hmm': '#3399FF',
+          'Skype': '#3399FF',
+          'Account': '#FF9500',
+          'DailyBoxOffice': '#00FF00',
+          'Cinema': '#3399FF',
+          };
+
+
+//Binary colors, faster render? Most of demos seem to use this format...
+//from nodeLabel property previously set on all nodes in graph
+
+          var colorsBin = {
+            'Org': 0x3399FFFF,
+            'Region': 0x3399FFFF,
+            'Geo': 0xEEEEEEFF,
+            'Indiv': 0xFF0000FF,
+            'Individual': 0xFF0000FF,
+            'Activity':	0xFF9500FF,
+            'Chain':	0xFF9500FF,
+            'Lead':	0xFFFF00FF,
+            'Property':	0xFFFF00FF,
+            'Oppty': 0xFFFF00FF,
+            'Subscr':	0x00FF00FF,
+            'Product': 0x00FF00FF,
+            'Offer': 0xFF00FFFF,
+            'Purch Channel': 0xFF00FFFF,
+            'Partner': 0xFF00FFFF,
+            'Budget':	0x0000FFFF,
+            'Campaign':	0x0000FFFF,
+            'Organic Search': 0x0000FFFF,
+            'Paid Media': 0x0000FFFF,
+            'Website':	0x0000FFFF,
+            'Email': 0x0000FFFF,
+            'Event': 0x0000FFFF,
+            'Modern Tele': 0x0000FFFF,
+            'Nurture Program':	0x0000FFFF,
+            'Day': 0xCCCCCCFF,
+            'Mesh': 0xFF9500FF,
+            'Hmm': 0x3399FFFF,
+            'Skype': 0x3399FFFF,
+            'Account': 0xFF9500FF,
+            'DailyBoxOffice': 0x00FF00FF,
+            'Cinema': 0x3399FFFF,
+            };
+
+        var graphics = Viva.Graph.View.webglGraphics();
+
+        // shader program is overkill and circles make it slow
+        // first, tell webgl graphics we want to use custom shader
+        // to render nodes:
+        //var circleNode = buildCircleNodeShader();
+        //graphics.setNodeProgram(circleNode);
+        // second, change the node ui model, which can be understood
+        // by the custom shader:
+
+        graphics.node(function (node) {
+
+            color = _.get(colorsBin, node.data.label, 0xFF0000FF);
+//            console.log(node.data.label, color );
+
+            var degree = node.links.length;
+            //var size = Math.log(degree + 1)*5;
+            var size = Math.log(degree + 5)*7.5;
+//            console.log("color",color,"data",node.data.label,"size",size,"degree",degree);
+            return new Viva.Graph.View.webglSquare(size, color);
+//          return new WebglCircle(nodeSize, nodeColor);
+
+         });
+        graphics.link(function (link) {
+            return Viva.Graph.View.webglLine(0x4D4D4DA0); // light transparent gray 0x909090A0
+        });
+
+        var renderer = Viva.Graph.View.renderer(graph,
+
+            {
+                layout     : layout,
+                graphics   : graphics,
+                renderLinks : true,
+                prerender  : true,
+                container: document.getElementById('graph')
+            });
+
+// added for convenience
+
+            $('.zoom').click(function (e) {
+                e.preventDefault();
+                if ($(this).hasClass('in')) {
+                    renderer.zoomIn();
+                } else {
+                    renderer.zoomOut();
+                }
+            });
+
+            $('.reset').click(function () {
+              renderer.reset()
+            });
+
+
+// legend overlay, from run.session().subscribe(meta).
+// Uses nodelLabel property set on nodes as display text.
+// In neo4j multiple labels are not set in a guaranteed order, so nodeLabel property is set for display text purposes
+          var meta = {
+            onNext: function(graphLegend) {
+              var nodeLabel = graphLegend._fields[0];
+              var nodeCount = graphLegend._fields[1].low;
+              var legendColor = _.get(colorsHex, graphLegend._fields[0], '#FF0000');
+
+              $("#legend").append('<tr><td><span style="color:' + legendColor +'";>' + nodeLabel + ': ' + nodeCount  + '</span></td></tr>');
+              console.log(nodeLabel,nodeCount);
+
+            },
+            onCompleted: function() {
+
+              console.log("done");
+
+            }
+          };
+
+
+            var count = 0;
+            var finished = 0;
+
+// new var viva with label parsing for colors.  nl added in position 0 in cypher return
+
+            var viva = {
+               onNext: function(record) {
+                  count ++;
+                  var n1 = record._fields[2];
+                  if (record.length == 4) {
+                     graph.addNode(n1);
+                     graph.getNode(n1).data = {label: record._fields[0]};
+
+                  }
+                  if (record.length == 4) {
+                        var n2 = record._fields[3];
+                        graph.addLink(n1, n2);
+                  }
+                  if (record.length == 6) {
+                        var n2 = record._fields[4];
+                        graph.addNode(n1, record._fields[2])
+                        graph.addNode(n2, record._fields[5])
+                        graph.addLink(n1, n2);
+                        graph.getNode(n1).data = {label: record._fields[0]};
+                        graph.getNode(n2).data = {label: record._fields[1]};
+                  }
+                  if (count % 5000 == 0) console.log("Currently",count,"links");
+                  var processingElement = document.getElementById('log');
+                  processingElement.innerHTML = 'Relationships: ' + count;
+               },
+
+               onCompleted: function() {
+                  console.log("Query finished, currently ",count,"links");
+                  var processingElement = document.getElementById('log');
+                  processingElement.innerHTML = 'Relationships: ' + count;
+/*
+                  Object.keys(colors).forEach(function (key) {
+                       var legend = colors[key][1];
+                       var legendColor = colors[key][0];
+                        $("#legend").append('<tr><td><span style="color:' + legendColor +'";>' + legend + '&#9608;</span></td></tr>');
+                  });
+*/
+                  var events = Viva.Graph.webglInputEvents(graphics, graph);
+                  events.mouseEnter(function (node) {
+                      //console.log('Mouse entered node: ' + node.id);
+                      //console.log(node.data.label);
+                      $("#tooltip").html("<span>Node: " + node.data.label + "</span>");
+                  }).mouseLeave(function (node) {
+                      //console.log('Mouse left node: ' + node.id);
+                  }).dblClick(function (node) {
+                      //console.log('Double click on node: ' + node.id);
+                  }).click(function (node) {
+                      //console.log('Single click on node: ' + node.id);
+
+                  });
+
+  /** RENDER MODE **/
+  // render after all data was added
+
+                renderer.run();
+
+                  finished ++;
+                  if (finished == 3) {
+                      setTimeout(function() { console.log("Pausing renderer"); renderer.pause(); },10000);
+                  }
+               }
+            };
+
+
+            function query(pattern, limit) {
+                limit = limit||10000;
+                // count nodes by nodeLabel property for legend for any (to)<-[]-(from) pattern
+                //var statementMeta = "MATCH "+pattern+" WITH COLLECT({ i: id(to), l: to.nodeLabel }) AS c1, COLLECT({ i: id(from), l: from.nodeLabel }) AS c2 WITH c1, c2 CALL apoc.coll.union(c1,c2) YIELD value as c3 WITH DISTINCT c3 UNWIND c3 AS rows CALL apoc.convert.toMap(rows) YIELD value AS map RETURN map.l as nodeLabel, COUNT(map.i) as nodeCount ORDER BY nodeCount DESC LIMIT "+limit;
+                //var statementMeta = "MATCH "+pattern+" WITH COLLECT({ i: id(to), l: labels(to) }) AS c1, COLLECT({ i: id(from), l: labels(from) }) AS c2 WITH c1, c2 CALL apoc.coll.union(c1,c2) YIELD value as c3 WITH DISTINCT c3 UNWIND c3 AS rows CALL apoc.convert.toMap(rows) YIELD value AS map RETURN map.l as nodeLabel, COUNT(map.i) as nodeCount ORDER BY nodeCount DESC LIMIT "+limit;
+                //var statementMeta = "MATCH "+pattern+" WITH COLLECT({ i: id(to), l: to.nodeLabel }) AS c1, COLLECT({ i: id(from), l: from.nodeLabel }) AS c2 WITH c1, c2, apoc.coll.union(c1,c2) as c3 WITH DISTINCT c3 UNWIND c3 AS rows WITH rows, apoc.convert.toMap(rows) AS map RETURN map.l as nodeLabel, COUNT(map.i) as nodeCount ORDER BY nodeCount DESC LIMIT "+limit;
+                var statementMeta = "CALL apoc.meta.stats() YIELD labels AS n WITH keys(n) AS k, [x in keys(n) | n[x] ] AS v WITH k,v, apoc.coll.zip(k,v) as zipped UNWIND zipped as rows RETURN rows[0] as nodeLabel, rows[1] as nodeCount ORDER BY nodeCount DESC"
+                console.log("Running",statementMeta);
+                session.run(statementMeta).subscribe(meta);
+                // added nl and ml to grab nodel Label property for colors
+                //var statement = "MATCH "+pattern+" RETURN from.nodeLabel as nl, to.nodeLabel as ml, id(from) as n, from.type as nt, id(to) as m, to.type as mt LIMIT "+limit;
+                var statement = "MATCH "+pattern+" RETURN labels(from) as nl, labels(to) as ml, id(from) as n, from.type as nt, id(to) as m, to.type as mt LIMIT "+limit;
+                console.log("Running",statement);
+                session.run(statement).subscribe(viva);
+            }
+
+//session.run("CYPHER runtime=compiled MATCH (n) RETURN id(n) as id LIMIT 10").subscribe(viva);
+
+
+// Basic
+            query("(to)<-[*1]-(from)",5000);
+
+// Basic
+//            query("(to)<-[ :HAS_ACCOUNT | HAS_CONTACT | IS_CLIENT_OF ]-(from)",50000);
+
+// Basic
+//           query("(to)<-[ :HAS_ACCOUNT | HAS_CONTACT | IS_CLIENT_OF ]-(from)",5000);
+
+// Basic
+//          query("(to)<-[ :IS_CLIENT_OF ]-(from)",5000);
+
+
+// The Bug! Entire Lead Attr Graph
+//            query("(to)-[*1]-(from)",25000);
+
+// The Snake! TimeTree Daily Leads
+//            query("(to)-[:CREATED_ON | NEXT]-(from)",100000);
+
+// The Spiderweb! TimeTree with Direct and Lead Purchases
+ //           query("(to)<-[: NEXT | CREATED_ON | CONVERTED_TO | SOLD_AS ]-(from)",100000);
+
+// The Amoeba: Marketing Funnel
+//            query("(to:TestData)<-[:TOUCHED | CONVERTED_TO | IS_RELATED_TO | SOLD_AS ]-(from:TestData)",100000);
+
+// Fireworks! Product Penetration
+//            query("(to:TestData)<-[:WORKS_FOR | CONVERTED_TO | IS_RELATED_TO | SOLD_AS ]-(from:TestData)",100000);
+
+// More Fireworks! Geo
+//            query("(to:TestData)<-[: HAS_LOCATION | PURCHASED | SOLD_AS ]-(from:TestData)",100000);
+
+// More Fireworks! Org
+//            query("(to:TestData)<-[: WORKS_FOR | HAS_LOCATION | PURCHASED | SOLD_AS ]-(from:TestData)",100000);
+
+// Bolt graphgen testing
+//         query("(to:Bolt)<-[*1]-(from:Bolt)",20000);
+
+// MPAA graph testing
+//         query("(to:MPAA)<-[*1]-(from:MPAA)",200000);
+
+//EAN graph
+//            query("(to)<-[:HAS_CATEGORY | LOCATED_IN | OPERATED_BY ]-(from)",10000);
+
+//EAN graph
+//              query("(to)<-[*1]-(from)",20000);
+
+
+/** RENDER MODE **/
+
+//            renderer.run(); // render incrementally as data is added
+
+
+    } //end of onload()
+
+
+
+    // Lets start from the easiest part - model object for node ui in webgl
+    function WebglCircle(size, color) {
+        this.size = size;
+        this.color = color;
+    }
+    // Next comes the hard part - implementation of API for custom shader
+    // program, used by webgl renderer:
+    function buildCircleNodeShader() {
+        // For each primitive we need 4 attributes: x, y, color and size.
+        var ATTRIBUTES_PER_PRIMITIVE = 4,
+            nodesFS = [
+            'precision mediump float;',
+            'varying vec4 color;',
+            'void main(void) {',
+            '   if ((gl_PointCoord.x - 0.5) * (gl_PointCoord.x - 0.5) + (gl_PointCoord.y - 0.5) * (gl_PointCoord.y - 0.5) < 0.25) {',
+            '     gl_FragColor = color;',
+            '   } else {',
+            '     gl_FragColor = vec4(0);',
+            '   }',
+            '}'].join('\n'),
+            nodesVS = [
+            'attribute vec2 a_vertexPos;',
+            // Pack color and size into vector. First elemnt is color, second - size.
+            // Since it's floating point we can only use 24 bit to pack colors...
+            // thus alpha channel is dropped, and is always assumed to be 1.
+            'attribute vec2 a_customAttributes;',
+            'uniform vec2 u_screenSize;',
+            'uniform mat4 u_transform;',
+            'varying vec4 color;',
+            'void main(void) {',
+            '   gl_Position = u_transform * vec4(a_vertexPos/u_screenSize, 0, 1);',
+            '   gl_PointSize = a_customAttributes[1] * u_transform[0][0];',
+            '   float c = a_customAttributes[0];',
+            '   color.b = mod(c, 256.0); c = floor(c/256.0);',
+            '   color.g = mod(c, 256.0); c = floor(c/256.0);',
+            '   color.r = mod(c, 256.0); c = floor(c/256.0); color /= 255.0;',
+            '   color.a = 1.0;',
+            '}'].join('\n');
+        var program,
+            gl,
+            buffer,
+            locations,
+            utils,
+            nodes = new Float32Array(64),
+            nodesCount = 0,
+            canvasWidth, canvasHeight, transform,
+            isCanvasDirty;
+        return {
+            /**
+             * Called by webgl renderer to load the shader into gl context.
+             */
+            load : function (glContext) {
+                gl = glContext;
+                webglUtils = Viva.Graph.webgl(glContext);
+                program = webglUtils.createProgram(nodesVS, nodesFS);
+                gl.useProgram(program);
+                locations = webglUtils.getLocations(program, ['a_vertexPos', 'a_customAttributes', 'u_screenSize', 'u_transform']);
+                gl.enableVertexAttribArray(locations.vertexPos);
+                gl.enableVertexAttribArray(locations.customAttributes);
+                buffer = gl.createBuffer();
+            },
+            /**
+             * Called by webgl renderer to update node position in the buffer array
+             *
+             * @param nodeUI - data model for the rendered node (WebGLCircle in this case)
+             * @param pos - {x, y} coordinates of the node.
+             */
+            position : function (nodeUI, pos) {
+                var idx = nodeUI.id;
+                nodes[idx * ATTRIBUTES_PER_PRIMITIVE] = pos.x;
+                nodes[idx * ATTRIBUTES_PER_PRIMITIVE + 1] = -pos.y;
+                nodes[idx * ATTRIBUTES_PER_PRIMITIVE + 2] = nodeUI.color;
+                nodes[idx * ATTRIBUTES_PER_PRIMITIVE + 3] = nodeUI.size;
+            },
+            /**
+             * Request from webgl renderer to actually draw our stuff into the
+             * gl context. This is the core of our shader.
+             */
+            render : function() {
+                gl.useProgram(program);
+                gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+                gl.bufferData(gl.ARRAY_BUFFER, nodes, gl.DYNAMIC_DRAW);
+                if (isCanvasDirty) {
+                    isCanvasDirty = false;
+                    gl.uniformMatrix4fv(locations.transform, false, transform);
+                    gl.uniform2f(locations.screenSize, canvasWidth, canvasHeight);
+                }
+                gl.vertexAttribPointer(locations.vertexPos, 2, gl.FLOAT, false, ATTRIBUTES_PER_PRIMITIVE * Float32Array.BYTES_PER_ELEMENT, 0);
+                gl.vertexAttribPointer(locations.customAttributes, 2, gl.FLOAT, false, ATTRIBUTES_PER_PRIMITIVE * Float32Array.BYTES_PER_ELEMENT, 2 * 4);
+                gl.drawArrays(gl.POINTS, 0, nodesCount);
+            },
+            /**
+             * Called by webgl renderer when user scales/pans the canvas with nodes.
+             */
+            updateTransform : function (newTransform) {
+                transform = newTransform;
+                isCanvasDirty = true;
+            },
+            /**
+             * Called by webgl renderer when user resizes the canvas with nodes.
+             */
+            updateSize : function (newCanvasWidth, newCanvasHeight) {
+                canvasWidth = newCanvasWidth;
+                canvasHeight = newCanvasHeight;
+                isCanvasDirty = true;
+            },
+            /**
+             * Called by webgl renderer to notify us that the new node was created in the graph
+             */
+            createNode : function (node) {
+                nodes = webglUtils.extendArray(nodes, nodesCount, ATTRIBUTES_PER_PRIMITIVE);
+                nodesCount += 1;
+            },
+            /**
+             * Called by webgl renderer to notify us that the node was removed from the graph
+             */
+            removeNode : function (node) {
+                if (nodesCount > 0) { nodesCount -=1; }
+                if (node.id < nodesCount && nodesCount > 0) {
+                    // we do not really delete anything from the buffer.
+                    // Instead we swap deleted node with the "last" node in the
+                    // buffer and decrease marker of the "last" node. Gives nice O(1)
+                    // performance, but make code slightly harder than it could be:
+                    webglUtils.copyArrayPart(nodes, node.id*ATTRIBUTES_PER_PRIMITIVE, nodesCount*ATTRIBUTES_PER_PRIMITIVE, ATTRIBUTES_PER_PRIMITIVE);
+                }
+            },
+            /**
+             * This method is called by webgl renderer when it changes parts of its
+             * buffers. We don't use it here, but it's needed by API (see the comment
+             * in the removeNode() method)
+             */
+            replaceProperties : function(replacedNode, newNode) {},
+        };
+    };
+
+    </script>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+    <style type="text/css" media="screen">
+        html, body, svg {
+          width: 100%;
+          height: 100%;
+          background-color: black;
+          font-family: 'Open Sans', sans-serif;
+        }
+        .button {
+          cursor: pointer;
+        }
+        h2,.log,.tooltip,.legend {
+          font-family: 'Open Sans', sans-serif;
+          color: white;
+        }
+    </style>
+</head>
+<body id="index" onload="onload();">
+    <div id="graph" style="width:100%;height:100%;">
+    <div style="color: white; z-index:2; margin: 10px; position: absolute;">
+    <div>
+    <h2>Graph Visualization</h2>
+    <button class='button zoom in'>Zoom In</button> | <button class='button zoom out'>Zoom Out</button> | <button class='button reset'>Reset</button>
+    <div>
+    <br>
+    <div class=log id='log'></div>
+    <br>
+    <div class=tooltip id='tooltip'>Node: </div>
+    <br>
+    <table class=legend id='legend'></table>
+    </div>
+</div>
+    <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+</body>
+</html>

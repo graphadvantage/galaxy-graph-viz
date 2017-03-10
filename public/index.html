@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Graph UI</title>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+    <style>
+    body {
+        font-family: 'Open Sans', sans-serif;
+        font-size: 15px;
+        background-color: #CCC;
+        margin: 20px;
+        overflow-y: scroll;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    td {
+        position: relative;
+        padding: 0;
+    }
+    #main {
+        width: 100%;
+        margin: 0px;
+        background-color: #DDD;
+        position: relative;
+    }
+    h1,h3,.log {
+        margin: 0;
+        padding: .5em;
+    }
+    form {
+        position: relative;
+    }
+    textarea {
+        border-width: 0;
+        margin: 0;
+        width: 100%;
+        resize: vertical;
+        min-height: 36px;
+        height: 72px;
+        padding: 0;
+        background-color: transparent;
+        vertical-align: top;
+        font-family: 'Open Sans', sans-serif;
+    }
+    #console {
+        width: 100%;
+        vertical-align: top;
+    }
+    #runButton {
+        font-size: 15px;
+        width: 100%;
+        height: 100%;
+        border-width: 0;
+        margin: 0;
+        cursor: pointer;
+        background-color: #008CC2;
+        color: #FFF;
+    }
+
+    #results table {
+        width: auto;
+        background-color: #EEE;
+        font-size: 13px;
+    }
+    #results th {
+        border-right: 1px solid #DDD;
+        border-bottom: 1px solid #DDD;
+        padding: 3px 5px;
+        background-color: #999;
+        color: #FFF;
+    }
+    #results td {
+        border-right: 1px solid #BBB;
+        border-bottom: 1px solid #BBB;
+        padding: 3px 5px;
+        vertical-align: top;
+    }
+    #statement {
+        font-size: 15px;
+    }
+    #parameters {
+        font-size: 15px;
+    }
+    #parameters td {
+    }
+    #parameters input[type=text] {
+        border-width: 0;
+        background-color: transparent;
+        color: #FFF;
+        padding: 0;
+        margin: 0;
+        font-size: 13px;
+    }
+    #parameters input[type=button] {
+        padding: 0 2px;
+    }
+    </style>
+    <script src="/bower_components/neo4j-driver/lib/browser/neo4j-web.js"></script>
+  </head>
+  <body>
+
+    <div id="main">
+      <h1>Neo4j JS Bolt Connector</h1>
+      <div class=log id='log1'></div>
+      <div class=log id='logE'></div>
+      <div style="float: right">
+        <a href="/ngraph.html" target="_blank"><h3>see the entire graph</h3></a>
+      </div>
+      <table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+          <td id="console">
+
+            <form>
+              <table>
+                <tr>
+
+                  <td style="width:75%;padding:2px 2px 2px 4px;background-color:#FFF;vertical-align:top" rowspan="2"><textarea id="statement" placeholder="(paste Cypher here)"></textarea></td>
+                  <td style="width:25%;vertical-align:top;background-color:#0F5788;color:#FFF">
+                    <table id="parameters"><tbody>
+                      <i>Bolt parameters: (runtime) (compiled)</i>
+                      <tr><td><input type="text" id="key" placeholder="(parameter)"></td><td><input type="text" id="value" placeholder="(value)"></td><td width="20"><input id="addParameter" type="button" value="+"></td></tr>
+                    </tbody></table>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="width:25%;height:40px;vertical-align:bottom;background-color:#0F5788"><input id="runButton" type="button" value="RUN" onfocus="this.blur()"></td>
+                </tr>
+              </table>
+            </form>
+
+            <div id="results"></div>
+
+          </td>
+
+        </tr>
+      </table>
+  </div>
+
+
+  <script>
+    var authToken = neo4j.v1.auth.basic("neo4j", "neo4j");
+    console.log(authToken);
+    var driver = neo4j.v1.driver("bolt://localhost", authToken, {
+        encrypted:false
+    });
+    var session = driver.session();
+
+    function run() {
+        var statement = document.getElementById("statement").value,
+            parameters = getParameters();
+
+        var start = Date.now();
+        var count = 0;
+
+        var table = document.createElement("table");
+        session.run(statement, parameters).subscribe({
+            count : 0,
+            onNext: function(record) {
+                // On receipt of RECORD
+                this.count++;
+                if (this.count == 1){
+                  console.log("row",this.count,"took",(Date.now()-start),"ms");
+                  var processingElement = document.getElementById('log1');
+                  processingElement.innerHTML = 'Time to Row: ' + this.count + ' --> ' + (Date.now()-start) + ' ms';
+                };
+                var tr = document.createElement("tr");
+                record.forEach( function( value ) {
+                    var td = document.createElement("td");
+                    td.appendChild(document.createTextNode(value));
+                    tr.appendChild(td);
+                });
+                table.appendChild(tr);
+            },
+            onCompleted: function(metadata) {
+
+            console.log("rows",this.count,"took",(Date.now()-start),"ms");
+            var processingElement = document.getElementById('logE');
+            processingElement.innerHTML = 'Time to Row: ' + this.count + ' --> ' + (Date.now()-start) + ' ms';
+
+            }
+        });
+
+        var results = document.getElementById("results");
+        while(results.childElementCount > 0) {
+            results.removeChild(results.children[0]);
+        }
+        results.appendChild(table);
+
+    }
+
+    function addParameter(key, value) {
+        var row = document.getElementById("addParameter").parentNode.parentNode;
+
+        if (!key) key = document.getElementById("key").value;
+        if (!value) value = document.getElementById("value").value;
+
+        if (key.length > 0) {
+            var tbody = document.getElementById("parameters").getElementsByTagName("tbody")[0];
+            var tr = document.createElement("tr");
+
+            var td1 = document.createElement("td");
+            td1.setAttribute("class", "parameter");
+            td1.appendChild(document.createTextNode(key));
+            tr.appendChild(td1);
+
+            var td2 = document.createElement("td");
+            td2.appendChild(document.createTextNode(value));
+            tr.appendChild(td2);
+
+            var td3 = document.createElement("td");
+            var button = document.createElement("input");
+            button.setAttribute("type", "button");
+            button.setAttribute("value", "-");
+            button.onclick = function(event) {
+                removeParameter(event.target.parentNode.parentNode);
+            };
+            td3.appendChild(button);
+            tr.appendChild(td3);
+
+            document.getElementById("key").value = "";
+            document.getElementById("value").value = "";
+
+            tbody.insertBefore(tr, row);
+        }
+    }
+
+    function removeParameter(row) {
+        row.parentNode.removeChild(row);
+    }
+
+    function getParameters() {
+        var map = {},
+            parameters = document.getElementById("parameters").getElementsByClassName("parameter");
+        for(var i = 0; i < parameters.length; i++) {
+            var p = parameters[i],
+                key = p.textContent,
+                value = p.nextSibling.textContent;
+            try {
+                map[key] = JSON.parse(value);
+            } catch(e) {
+                map[key] = value;
+            }
+        }
+        return map;
+    }
+
+    document.getElementById("addParameter").onclick = function(event) {
+        addParameter();
+    };
+    document.getElementById("runButton").onclick = run;
+
+    </script>
+
+  </body>
+</html>
