@@ -7,7 +7,7 @@ open http://localhost:8002
 <html>
 <head>
     <meta http-equiv="Content-type" content="text/html; charset=utf-8"></meta>
-    <title>Graph Viz</title>
+    <title>Galaxy Graph Viz</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"></meta>
     <script src="/bower_components/neo4j-driver/lib/browser/neo4j-web.min.js"></script>
     <script src="/bower_components/vivagraphjs/dist/vivagraph.js"></script>
@@ -51,47 +51,28 @@ open http://localhost:8002
 //from nodeLabel property previously set on all nodes in graph
 
         var colorsHex = {
-          'Org': '#3399FF',
-          'Region': '#3399FF',
-          'Geo': '#EEEEEE',
-          'Indiv': '#FF0000',
-          'Individual': '#FF0000',
-          'Activity':	'#FF9500',
-          'Chain':	'#FF9500',
-          'Lead':	'#FFFF00',
-          'Property':	'#FFFF00',
-          'Oppty': '#FFFF00',
-          'Subscr':	'#00FF00',
-          'Product': '#00FF00',
-          'Offer': '#FF00FF',
-          'Purch Channel': '#FF00FF',
-          'Partner': '#FF00FF',
-          'Budget':	'#0000FF',
-          'Campaign':	'#0000FF',
-          'Organic Search': '#0000FF',
-          'Paid Media': '#0000FF',
-          'Website':	'#0000FF',
-          'Email': '#0000FF',
-          'Event': '#0000FF',
-          'Modern Tele': '#0000FF',
-          'Nurture Program':	'#0000FF',
-          'Day': '#CCCCCC',
-          'Mesh': '#FF9500',
-          'Hmm': '#3399FF',
-          'Skype': '#3399FF',
-          'Account': '#FF9500',
-          'DailyBoxOffice': '#00FF00',
-          'Cinema': '#3399FF',
-          'ShippingInfo': '#00FF00',
-          'ListingInfo': '#FF00FF',
-          'SellingStatus': '#FF0000',
-          'Item': '#EEEEEE',
-          'PostalCode': '#3399FF',
-          'City': '#0000FF',
-          'Country': '#0000FF',
-          'StateOrProvince': '#0000FF',
-          'Category': '#FF9500',
-          'PaymentMethod': '#FFFF00'
+          'Account':	'A3CE4B',
+          'Organization':	'A15596',
+          'FinancialPlan':	'D73331',
+          'Customer':	'FCDD5C',
+          'Product':	'5ABEDE',
+          'Activity':	'29FF30',
+          'Research':	'F7A2A9',
+          'Cash':	'877DDE',
+          'Security':	'5AEDFF',
+          'AccountType':	'1B497F',
+          'Profile':	'DD87FB',
+          'Response':	'A2AD29',
+          'Role':	'51D762',
+          'Trade':	'45B5C4',
+          'Analyst':	'FF0000',
+          'TradeReco':	'E420F1',
+          'Idea':	'F54044',
+          'Transfer':	'4C42DE',
+          'FinancialAdvisor':	'51FFC4',
+          'Team':	'3973B6',
+          'Genome':	'FFFFFF',
+          'Communication':	'FF9500'
           };
 
 
@@ -99,47 +80,28 @@ open http://localhost:8002
 //from nodeLabel property previously set on all nodes in graph
 
           var colorsBin = {
-            'Org': 0x3399FFFF,
-            'Region': 0x3399FFFF,
-            'Geo': 0xEEEEEEFF,
-            'Indiv': 0xFF0000FF,
-            'Individual': 0xFF0000FF,
-            'Activity':	0xFF9500FF,
-            'Chain':	0xFF9500FF,
-            'Lead':	0xFFFF00FF,
-            'Property':	0xFFFF00FF,
-            'Oppty': 0xFFFF00FF,
-            'Subscr':	0x00FF00FF,
-            'Product': 0x00FF00FF,
-            'Offer': 0xFF00FFFF,
-            'Purch Channel': 0xFF00FFFF,
-            'Partner': 0xFF00FFFF,
-            'Budget':	0x0000FFFF,
-            'Campaign':	0x0000FFFF,
-            'Organic Search': 0x0000FFFF,
-            'Paid Media': 0x0000FFFF,
-            'Website':	0x0000FFFF,
-            'Email': 0x0000FFFF,
-            'Event': 0x0000FFFF,
-            'Modern Tele': 0x0000FFFF,
-            'Nurture Program':	0x0000FFFF,
-            'Day': 0xCCCCCCFF,
-            'Mesh': 0xFF9500FF,
-            'Hmm': 0x3399FFFF,
-            'Skype': 0x3399FFFF,
-            'Account': 0xFF9500FF,
-            'DailyBoxOffice': 0x00FF00FF,
-            'Cinema': 0x3399FFFF,
-            'ShippingInfo': 0x00FF00FF,
-            'ListingInfo': 0xFF00FFFF,
-            'SellingStatus': 0xFF0000FF,
-            'Item':  0xEEEEEEFF,
-            'PostalCode': 0x3399FFFF,
-            'City': 0x0000FFFF,
-            'Country': 0x0000FFFF,
-            'StateOrProvince': 0x0000FFFF,
-            'Category': 0xFF9500FF,
-            'PaymentMethod': 0xFFFF00FF
+            'Account':	0xA3CE4BFF,
+            'Organization':	0xA15596FF,
+            'FinancialPlan':	0xD73331FF,
+            'Customer':	0xFCDD5CFF,
+            'Product':	0x5ABEDEFF,
+            'Activity':	0x29FF30FF,
+            'Research':	0xF7A2A9FF,
+            'Cash':	0x877DDEFF,
+            'Security':	0x5AEDFFFF,
+            'AccountType':	0x1B497FFF,
+            'Profile':	0xDD87FBFF,
+            'Response':	0xA2AD29FF,
+            'Role':	0x51D762FF,
+            'Trade':	0x45B5C4FF,
+            'Analyst':	0xFF0000FF,
+            'TradeReco':	0xE420F1FF,
+            'Idea':	0xF54044FF,
+            'Transfer':	0x4C42DEFF,
+            'FinancialAdvisor':	0x51FFC4FF,
+            'Team':	0x3973B6FF,
+            'Genome':	0xFFFFFFFF,
+            'Communication': 0xFF9500FF
             };
 
         var graphics = Viva.Graph.View.webglGraphics();
@@ -305,7 +267,8 @@ open http://localhost:8002
 
 
 // Basic
-            query("(to)<-[*1]-(from)",160000);
+            query("(to)-[*1]-(from)",210000);
+//            query("(to)-[:ADVANCE_TO | HAS_GAME | WON_TITLE ]-(from)",50000);
 
 // Basic
 //            query("(to)<-[ :HAS_ACCOUNT | HAS_CONTACT | IS_CLIENT_OF ]-(from)",50000);
@@ -517,7 +480,7 @@ open http://localhost:8002
     <div id="graph" style="width:100%;height:100%;">
     <div style="color: white; z-index:2; margin: 10px; position: absolute;">
     <div>
-    <h2>Graph Visualization</h2>
+    <h2>Galaxy Graph Visualization</h2>
     <button class='button zoom in'>Zoom In</button> | <button class='button zoom out'>Zoom Out</button> | <button class='button reset'>Reset</button>
     <div>
     <br>
